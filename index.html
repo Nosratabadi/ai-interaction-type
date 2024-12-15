@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Interaction Type Assessment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .question-container {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .option {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .option:hover {
+            background-color: #f0f0f0;
+        }
+        .option.selected {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .progress {
+            height: 100%;
+            background-color: #2196f3;
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+        #result {
+            display: none;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI Interaction Type Assessment</h1>
+    <div class="progress-bar">
+        <div class="progress" id="progress"></div>
+    </div>
+    <div id="quiz-container">
+        <div class="question-container">
+            <div id="question"></div>
+            <div class="options" id="options"></div>
+        </div>
+        <button onclick="nextQuestion()" id="next-btn">Next</button>
+    </div>
+    <div id="result"></div>
+
+    <script>
+        const questions = [
+            {
+                question: "When using AI tools like ChatGPT, how do you typically approach the outputs?",
+                options: [
+                    "I trust and implement the suggestions directly",
+                    "I review and modify the suggestions based on my judgment",
+                    "I carefully validate every output before using it",
+                    "I prefer to minimize my use of AI suggestions",
+                    "I avoid using AI tools whenever possible"
+                ]
+            },
+            {
+                question: "How do you feel about AI making decisions in your work/life?",
+                options: [
+                    "Very comfortable - I welcome AI decision-making",
+                    "Somewhat comfortable - I like AI as a supporting tool",
+                    "Neutral - I prefer to validate AI decisions",
+                    "Somewhat uncomfortable - I prefer human decisions",
+                    "Very uncomfortable - I avoid AI decision-making"
+                ]
+            },
+            {
+                question: "How often do you interact with AI tools?",
+                options: [
+                    "Multiple times daily",
+                    "Daily",
+                    "A few times per week",
+                    "Rarely",
+                    "Never if I can avoid it"
+                ]
+            },
+            {
+                question: "When an AI tool gives you an answer, what's your first reaction?",
+                options: [
+                    "Immediate acceptance and implementation",
+                    "Quick review then implementation",
+                    "Thorough verification before use",
+                    "Skepticism and double-checking",
+                    "Distrust and seeking alternatives"
+                ]
+            },
+            {
+                question: "How do you prefer to learn about new topics?",
+                options: [
+                    "AI-guided learning and recommendations",
+                    "Combination of AI and traditional resources",
+                    "Traditional resources with AI verification",
+                    "Primarily traditional resources",
+                    "Exclusively human-created resources"
+                ]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let answers = [];
+
+        function displayQuestion() {
+            const questionEl = document.getElementById('question');
+            const optionsEl = document.getElementById('options');
+            const progressEl = document.getElementById('progress');
+            
+            questionEl.textContent = questions[currentQuestion].question;
+            optionsEl.innerHTML = '';
+            
+            questions[currentQuestion].options.forEach((option, index) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.textContent = option;
+                div.onclick = () => selectOption(index);
+                optionsEl.appendChild(div);
+            });
+
+            progressEl.style.width = `${(currentQuestion / questions.length) * 100}%`;
+        }
+
+        function selectOption(index) {
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => option.classList.remove('selected'));
+            options[index].classList.add('selected');
+            answers[currentQuestion] = index;
+        }
+
+        function nextQuestion() {
+            if (answers[currentQuestion] === undefined) {
+                alert('Please select an answer before continuing');
+                return;
+            }
+
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function calculateType() {
+            const score = answers.reduce((acc, val) => acc + val, 0);
+            const avgScore = score / questions.length;
+
+            if (avgScore <= 0.8) return {
+                type: "AI Embracer",
+                description: "You are highly comfortable with AI technology and actively seek to integrate it into your daily life. You trust AI systems and are willing to delegate significant decisions to them. You're likely an early adopter of new AI tools and see AI as a valuable partner in your personal and professional life."
+            };
+            else if (avgScore <= 1.6) return {
+                type: "Balanced Collaborator",
+                description: "You view AI as a helpful tool while maintaining your own judgment as the primary decision-maker. You're comfortable with AI assistance but prefer to maintain a balanced approach, using AI as a supplement to your own thinking rather than a replacement."
+            };
+            else if (avgScore <= 2.4) return {
+                type: "Cautious Validator",
+                description: "You appreciate AI's potential but prefer to thoroughly verify its outputs. You take a 'trust but verify' approach, carefully examining AI suggestions before implementation. You value control and understanding in your AI interactions."
+            };
+            else if (avgScore <= 3.2) return {
+                type: "Selective Minimalist",
+                description: "You prefer limited AI interaction and use it only for specific, well-defined purposes. You maintain a healthy skepticism towards AI and prefer human interaction in most situations. You're selective about when and how you engage with AI tools."
+            };
+            else return {
+                type: "Tech Skeptic",
+                description: "You prefer to minimize your interaction with AI systems and maintain strong human control over decisions. You might have concerns about AI's reliability or impact on society. You prefer traditional, human-centered approaches to problem-solving."
+            };
+        }
+
+        function showResult() {
+            const resultEl = document.getElementById('result');
+            const quizContainer = document.getElementById('quiz-container');
+            const result = calculateType();
+
+            resultEl.innerHTML = `
+                <h2>Your AI Interaction Type: ${result.type}</h2>
+                <p>${result.description}</p>
+                <button onclick="location.reload()">Take Again</button>
+            `;
+
+            resultEl.style.display = 'block';
+            quizContainer.style.display = 'none';
+        }
+
+        displayQuestion();
+    </script>
+</body>
+  </html>
